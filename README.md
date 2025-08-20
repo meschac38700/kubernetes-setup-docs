@@ -209,7 +209,7 @@ kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath="{.data.token}
 
 ---
 
-Now, you should be able to access the dashboard on [http://dashboard.192.168.1.240.nip.io/#/login](http://dashboard.192.168.1.240.nip.io/#/login)
+Now, you should be able to access the dashboard on [https://dashboard.192.168.1.240.nip.io/#/login](https://dashboard.192.168.1.240.nip.io/#/login)
 
 OR
 
@@ -219,4 +219,25 @@ Use port-forward as bellow:
 kubectl -n kubernetes-dashboard port-forward svc/k8s-dashboard-kong-proxy 8443:443
 ```
 
-Then go to [http://localhost:8443/#/login](http://localhost:8443)
+Then go to [https://localhost:8443/#/login](https://localhost:8443/#/login)
+
+---
+
+### Generate an auto signed TLS certificate
+
+[Find the Docs here](https://kubernetes.github.io/ingress-nginx/user-guide/tls/)
+
+```console
+CERT_FILE=cert.pem
+KEY_FILE=key.pem
+HOST=dashboard.192.168.1.240.nip.io
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ${KEY_FILE} -out ${CERT_FILE} -subj "/CN=${HOST}/O=${HOST}" -addext "subjectAltName = DNS:${HOST}"
+```
+
+Then create the secret:
+
+```console
+CERT_NAME=dashboard-tls-cert
+kubectl create secret tls ${CERT_NAME} --key ${KEY_FILE} --cert ${CERT_FILE}
+```

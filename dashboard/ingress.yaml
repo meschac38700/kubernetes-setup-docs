@@ -5,17 +5,33 @@ metadata:
   labels:
     app: dashboard
   namespace: kubernetes-dashboard
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - dashboard.192.168.1.240.nip.io
+      secretName: dashboard-tls-cert
   rules:
-    - host: dashboard.192.168.1.240.nip.io
+    - host: dashboard.eliam-lotonga.fr # Access from cloudflare tunnel
       http:
         paths:
           - pathType: Prefix
             path: "/"
             backend:
               service:
-                name: kubernetes-dashboard-web
+                name: kubernetes-dashboard-kong-proxy
                 port:
-                  number: 8000
+                  number: 443
+    - host: dashboard.192.168.1.240.nip.io # Access from local
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: kubernetes-dashboard-kong-proxy
+                port:
+                  number: 443

@@ -1,2 +1,4 @@
 token.*
 resource-*
+tls
+cloudflared
